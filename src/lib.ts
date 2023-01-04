@@ -9,6 +9,8 @@ const musicTableOffsets = {
 const numGroups = 8;
 const groupSize = 0x100;
 const ptrSize = 2;
+const checksumOffset = 0x14e;
+const checuksumSize = 2;
 const bankAddrStart = 0x4000;
 const bankAddrEnd = 0x7fff;
 const maxMusicValue = 0x46;
@@ -77,6 +79,21 @@ function replaceMusicValues(
     }
 }
 
+function byteSum16(xs: Uint8Array): number {
+    let sum = 0;
+    for (const x of xs) sum = (sum + x) % 0x10000;
+    return sum;
+}
+
+function fixHeaderChecksum(rom: ArrayBuffer) {
+    const bytes = new Uint8Array(rom);
+    const sum = (
+        byteSum16(bytes.slice(0, checksumOffset))
+        + byteSum16(bytes.slice(checksumOffset + checuksumSize))
+    ) % 0x10000;
+    new DataView(rom).setUint16(checksumOffset, sum, false);
+}
+
 // one potential caveat to this approach is that music values not present in
 // the music-by-room table (if there are any) don't participate in the shuffle.
 export function shuffleMusicInPlace(rom: ArrayBuffer): Error | undefined {
@@ -92,6 +109,6 @@ export function shuffleMusicInPlace(rom: ArrayBuffer): Error | undefined {
     }
 
     const musicMap = createShuffleMap(unqiueMusicValues);
-    console.log(musicMap);
     replaceMusicValues(view, musicGroupPtrs, musicMap);
+    fixHeaderChecksum(rom);
 }
