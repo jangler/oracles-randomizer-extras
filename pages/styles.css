@@ -14,6 +14,6 @@ main {
     border-bottom: black solid 1px;
 }
 
-label {
+label, input {
     padding-right: 0.5rem;
 }
