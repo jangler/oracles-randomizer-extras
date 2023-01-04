@@ -1,3 +1,5 @@
+export { shuffleMusicInPlace };
+
 enum Game { Seasons, Ages }
 
 const musicBankOffset = 0x03 * 0x4000;
@@ -96,7 +98,7 @@ function fixHeaderChecksum(rom: ArrayBuffer) {
 
 // one potential caveat to this approach is that music values not present in
 // the music-by-room table (if there are any) don't participate in the shuffle.
-export function shuffleMusicInPlace(rom: ArrayBuffer) {
+function shuffleMusicInPlace(rom: ArrayBuffer) {
     const game = romType(rom);
     const view = new DataView(rom);
 
