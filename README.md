@@ -1,5 +1,7 @@
 # Oracles Randomizer Extras
 
+<https://jangler.github.io/oracles-randomizer-extras/>
+
 Logic-less customizations that can be applied to an Oracles ROM
 post-randomization. See <https://github.com/jangler/oracles-randomizer> for the
 main randomizer.
