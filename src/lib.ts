@@ -15,7 +15,7 @@ const bankAddrStart = 0x4000;
 const bankAddrEnd = 0x7fff;
 const maxMusicValue = 0x46;
 
-function romType(rom: ArrayBuffer): Game | Error {
+function romType(rom: ArrayBuffer): Game {
     const title = Array.from(new Uint8Array(rom.slice(0x134, 0x143)))
         .filter((x) => x !== 0)
         .map((x) => String.fromCharCode(x))
@@ -24,7 +24,7 @@ function romType(rom: ArrayBuffer): Game | Error {
         case "ZELDA DINAZ7E": return Game.Seasons;
         case "ZELDA NAYRUAZ8E": return Game.Ages;
     }
-    return new Error("Unrecognized ROM title: " + title);
+    throw new Error("Unrecognized ROM title: " + title);
 }
 
 function readPtr(rom: DataView, offset: number): number {
@@ -96,16 +96,15 @@ function fixHeaderChecksum(rom: ArrayBuffer) {
 
 // one potential caveat to this approach is that music values not present in
 // the music-by-room table (if there are any) don't participate in the shuffle.
-export function shuffleMusicInPlace(rom: ArrayBuffer): Error | undefined {
+export function shuffleMusicInPlace(rom: ArrayBuffer) {
     const game = romType(rom);
-    if (game instanceof Error) return game;
-
     const view = new DataView(rom);
+
     const musicGroupPtrs = readMusicGroupPtrs(view, game);
     const unqiueMusicValues = readUniqueMusicValues(rom, musicGroupPtrs);
     if (!musicGroupPtrs.every(isValidGroupPtr)
         || unqiueMusicValues.some((x) => x > maxMusicValue)) {
-        return new Error("Could not read music table");
+        throw new Error("Could not read music table");
     }
 
     const musicMap = createShuffleMap(unqiueMusicValues);

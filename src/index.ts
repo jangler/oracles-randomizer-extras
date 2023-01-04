@@ -35,13 +35,13 @@ generateButton.addEventListener('click', (event) => {
     const file = fileInput.files?.item(0);
     if (file) {
         file.arrayBuffer().then((buf) => {
-            const err = shuffleMusicInPlace(buf);
-            if (err) {
-                reportError(err);
-            } else {
-                clearError();
+            clearError();
+            try {
+                shuffleMusicInPlace(buf);
                 const blob = new Blob([buf], { type: 'application/gbc' });
                 download(blob, file.name.replace('.gbc', '_extras.gbc'));
+            } catch (err) {
+                reportError(err);
             }
         });
     }
