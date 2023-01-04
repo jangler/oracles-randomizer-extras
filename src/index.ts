@@ -1,6 +1,7 @@
 import { shuffleMusicInPlace } from "./lib";
 
-const runButton = document.querySelector('#runButton') as HTMLButtonElement;
+const generateButton =
+    document.querySelector('#generateButton') as HTMLButtonElement;
 const messageArea =
     document.querySelector('#messageArea') as HTMLParagraphElement;
 
@@ -29,7 +30,7 @@ function download(blob: Blob, filename: string) {
 }
 
 // currently, this downloads the same file with no modification.
-runButton.addEventListener('click', (event) => {
+generateButton.addEventListener('click', (event) => {
     const fileInput = document.querySelector('#fileInput') as HTMLInputElement;
     const file = fileInput.files?.item(0);
     if (file) {

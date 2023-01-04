@@ -14,8 +14,12 @@ main {
     border-bottom: black solid 1px;
 }
 
-label, input {
+label {
     padding-right: 0.5rem;
+}
+
+#generateButton {
+    float: right;
 }
 
 #messageArea {
