@@ -17,3 +17,11 @@ main {
 label, input {
     padding-right: 0.5rem;
 }
+
+#messageArea {
+    color: darkred;
+    background-color: lightpink;
+    padding: 0.5rem;
+    border: darkred solid 1px;
+    display: none;
+}
