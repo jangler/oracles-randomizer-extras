@@ -2,28 +2,16 @@
 
 export { shuffleMusicInPlace };
 
-import { Game, romType, readPtr } from './rom';
+import { Game, romType, numGroups, groupSize, readPtrTable } from './rom';
+import { isFirstInstance } from './utils';
 
 const musicBankOffset = 0x03 * 0x4000;
 const musicTableOffsets = {
-    [Game.Seasons]: musicBankOffset + 0x483c,
-    [Game.Ages]: musicBankOffset + 0x495c,
+    [Game.Seasons]: 0x483c,
+    [Game.Ages]: 0x495c,
 }
 
-const numGroups = 8;
-const groupSize = 0x100;
-const ptrSize = 2;
-const bankAddrStart = 0x4000;
-const bankAddrEnd = 0x7fff;
 const maxMusicValue = 0x46;
-
-function isFirstInstance<T>(value: T, index: number, array: T[]): boolean {
-    return array.indexOf(value) === index;
-}
-
-function isValidGroupPtr(x: number): boolean {
-    return x >= bankAddrStart && x <= bankAddrEnd - groupSize;
-}
 
 // https://stackoverflow.com/a/12646864
 function shuffle<T>(array: T[]): T[] {
@@ -33,12 +21,6 @@ function shuffle<T>(array: T[]): T[] {
         [copy[i], copy[j]] = [copy[j], copy[i]];
     }
     return copy;
-}
-
-function readMusicGroupPtrs(rom: DataView, game: Game): number[] {
-    return [...Array(numGroups).keys()]
-        .map((i) => readPtr(rom, musicTableOffsets[game] + i * ptrSize))
-        .filter(isFirstInstance);
 }
 
 function readUniqueMusicValues(rom: ArrayBuffer, ptrs: number[]): number[] {
@@ -71,11 +53,11 @@ function shuffleMusicInPlace(rom: ArrayBuffer) {
     const game = romType(rom);
     const view = new DataView(rom);
 
-    const musicGroupPtrs = readMusicGroupPtrs(view, game);
+    const offset = musicBankOffset + musicTableOffsets[game];
+    const musicGroupPtrs = readPtrTable(view, offset, numGroups);
     const unqiueMusicValues = readUniqueMusicValues(rom, musicGroupPtrs);
-    if (!musicGroupPtrs.every(isValidGroupPtr)
-        || unqiueMusicValues.some((x) => x > maxMusicValue)) {
-        throw new Error("Could not read music table");
+    if (unqiueMusicValues.some((x) => x > maxMusicValue)) {
+        throw new Error("Read invalid music index from ROM");
     }
 
     const musicMap = createShuffleMap(unqiueMusicValues);
