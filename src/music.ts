@@ -1,6 +1,8 @@
+// music shuffle
+
 export { shuffleMusicInPlace };
 
-enum Game { Seasons, Ages }
+import { Game, romType, readPtr, fixHeaderChecksum } from './rom';
 
 const musicBankOffset = 0x03 * 0x4000;
 const musicTableOffsets = {
@@ -11,27 +13,9 @@ const musicTableOffsets = {
 const numGroups = 8;
 const groupSize = 0x100;
 const ptrSize = 2;
-const checksumOffset = 0x14e;
-const checuksumSize = 2;
 const bankAddrStart = 0x4000;
 const bankAddrEnd = 0x7fff;
 const maxMusicValue = 0x46;
-
-function romType(rom: ArrayBuffer): Game {
-    const title = Array.from(new Uint8Array(rom.slice(0x134, 0x143)))
-        .filter((x) => x !== 0)
-        .map((x) => String.fromCharCode(x))
-        .join("");
-    switch (title) {
-        case "ZELDA DINAZ7E": return Game.Seasons;
-        case "ZELDA NAYRUAZ8E": return Game.Ages;
-    }
-    throw new Error("Unrecognized ROM title: " + title);
-}
-
-function readPtr(rom: DataView, offset: number): number {
-    return rom.getInt16(offset, true);
-}
 
 function isFirstInstance<T>(value: T, index: number, array: T[]): boolean {
     return array.indexOf(value) === index;
@@ -79,21 +63,6 @@ function replaceMusicValues(
             rom.setUint8(offset, map.get(rom.getUint8(offset)) as number);
         }
     }
-}
-
-function byteSum16(xs: Uint8Array): number {
-    let sum = 0;
-    for (const x of xs) sum = (sum + x) % 0x10000;
-    return sum;
-}
-
-function fixHeaderChecksum(rom: ArrayBuffer) {
-    const bytes = new Uint8Array(rom);
-    const sum = (
-        byteSum16(bytes.slice(0, checksumOffset))
-        + byteSum16(bytes.slice(checksumOffset + checuksumSize))
-    ) % 0x10000;
-    new DataView(rom).setUint16(checksumOffset, sum, false);
 }
 
 // one potential caveat to this approach is that music values not present in

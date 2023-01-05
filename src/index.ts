@@ -1,4 +1,6 @@
-import { shuffleMusicInPlace } from "./lib";
+// front-end
+
+import { shuffleMusicInPlace } from "./music";
 
 const generateButton =
     document.querySelector('#generateButton') as HTMLButtonElement;
