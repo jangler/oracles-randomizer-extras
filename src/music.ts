@@ -2,7 +2,7 @@
 
 export { shuffleMusicInPlace };
 
-import { Game, romType, readPtr, fixHeaderChecksum } from './rom';
+import { Game, romType, readPtr } from './rom';
 
 const musicBankOffset = 0x03 * 0x4000;
 const musicTableOffsets = {
@@ -80,5 +80,4 @@ function shuffleMusicInPlace(rom: ArrayBuffer) {
 
     const musicMap = createShuffleMap(unqiueMusicValues);
     replaceMusicValues(view, musicGroupPtrs, musicMap);
-    fixHeaderChecksum(rom);
 }
