@@ -11,6 +11,12 @@ const musicShuffleCheckbox =
     document.querySelector('#musicShuffleCheckbox') as HTMLInputElement;
 const sfxShuffleCheckbox =
     document.querySelector('#sfxShuffleCheckbox') as HTMLInputElement;
+const changelogButton =
+    document.querySelector('#changelogButton') as HTMLButtonElement;
+const changelog =
+    document.querySelector('#changelog') as HTMLElement;
+
+let changelogShown = false;
 
 function reportError(err: Error) {
     messageArea.setAttribute('style', 'display: block;');
@@ -54,3 +60,14 @@ generateButton.addEventListener('click', (event) => {
         });
     }
 });
+
+changelogButton.addEventListener('click', (event) => {
+    if (changelogShown) {
+        changelog.setAttribute('style', 'display: none');
+        changelogButton.textContent = 'Show changelog';
+    } else {
+        changelog.setAttribute('style', 'display: block');
+        changelogButton.textContent = 'Hide changelog';
+    }
+    changelogShown = !changelogShown;
+})

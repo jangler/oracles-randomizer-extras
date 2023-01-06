@@ -30,3 +30,7 @@ section {
     border: darkred solid 1px;
     display: none;
 }
+
+#changelog {
+    display: none;
+}
