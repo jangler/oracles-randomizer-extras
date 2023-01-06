@@ -23,6 +23,10 @@ section {
     margin-bottom: 1.5rem;
 }
 
+h2 {
+    font-size: larger;
+}
+
 #options {
     line-height: 2;
 }
