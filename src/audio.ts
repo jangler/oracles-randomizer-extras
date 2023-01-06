@@ -1,4 +1,4 @@
-// music shuffle
+// music and sfx shuffle
 
 export { shuffleMusic, shuffleSfx };
 
