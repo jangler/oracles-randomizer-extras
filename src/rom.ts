@@ -2,7 +2,7 @@
 
 export {
     numGroups, groupSize, Game, romType, ptrSize, readPtr, readPtrTable,
-    fixHeaderChecksum
+    fixHeaderChecksum, formatOffset
 };
 
 import { isFirstInstance } from "./utils";
@@ -33,12 +33,18 @@ function isValidPtr(x: number): boolean {
     return x >= bankAddrStart && x <= bankAddrEnd;
 }
 
+function formatOffset(offset: number): string {
+    return Math.floor(offset / 0x4000).toString(16) + ':' +
+        (0x4000 + offset % 0x4000).toString(16);
+}
+
 function readPtr(
     rom: DataView, offset: number, littleEndian: boolean = true
 ): number {
     const ptr = rom.getUint16(offset, littleEndian)
     if (!isValidPtr(ptr)) {
-        throw new Error("Read invalid pointer from ROM");
+        throw new Error("Read invalid pointer from ROM at "
+            + formatOffset(offset));
     }
     return ptr;
 }

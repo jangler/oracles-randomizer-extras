@@ -2,16 +2,31 @@
 
 export { shuffleMusicInPlace };
 
-import { Game, romType, numGroups, groupSize, readPtrTable } from './rom';
-import { isFirstInstance } from './utils';
+import { Game, romType, formatOffset } from './rom';
 
-const musicBankOffset = 0x03 * 0x4000;
-const musicTableOffsets = {
-    [Game.Seasons]: 0x483c,
-    [Game.Ages]: 0x495c,
+const soundPointerTableOffsets = {
+    [Game.Seasons]: (0x39 - 1) * 0x4000 + 0x57cf,
+    [Game.Ages]: (0x39 - 1) * 0x4000 + 0x5748,
+}
+const soundPtrSize = 3;
+const soundPtrAddrIsLittleEndian = true;
+
+const musicIndices = [...new Array(0x4c).keys()];
+
+function readSoundPtr(view: DataView, offset: number): [number, number] {
+    const bankOffset = view.getUint8(offset);
+    const addr = view.getUint16(offset + 1, soundPtrAddrIsLittleEndian);
+    if (bankOffset > 0x3f || addr < 0x4000 || addr > 0x7fff) {
+        const msg = 'Read invalid sound pointer at ' + formatOffset(offset);
+        throw new Error(msg);
+    }
+    return [bankOffset, addr];
 }
 
-const maxMusicValue = 0x46;
+function writeSoundPtr(view: DataView, offset: number, ptr: [number, number]) {
+    view.setUint8(offset, ptr[0]);
+    view.setUint16(offset + 1, ptr[1], soundPtrAddrIsLittleEndian);
+}
 
 // https://stackoverflow.com/a/12646864
 function shuffle<T>(array: T[]): T[] {
@@ -23,44 +38,14 @@ function shuffle<T>(array: T[]): T[] {
     return copy;
 }
 
-function readUniqueMusicValues(rom: ArrayBuffer, ptrs: number[]): number[] {
-    return ptrs.flatMap((ptr) => {
-        const offset = musicBankOffset + ptr;
-        const slice = rom.slice(offset, offset + groupSize);
-        return Array.from(new Uint8Array(slice));
-    }).filter(isFirstInstance);
-}
-
-function createShuffleMap<T>(pool: T[]): Map<T, T> {
-    const shuffledPool = shuffle(pool);
-    return new Map(pool.map((x, i) => [x, shuffledPool[i]]));
-}
-
-function replaceMusicValues(
-    rom: DataView, ptrs: number[], map: Map<number, number>
-) {
-    for (const ptr of ptrs) {
-        for (let room = 0; room < groupSize; room++) {
-            const offset = musicBankOffset + ptr + room;
-            rom.setUint8(offset, map.get(rom.getUint8(offset)) as number);
-        }
-    }
-}
-
-// one potential caveat to this approach is that music values not present in
-// the music-by-room table (if there are any) don't participate in the shuffle.
-// TODO shuffle pointers instead
 function shuffleMusicInPlace(rom: ArrayBuffer) {
     const game = romType(rom);
     const view = new DataView(rom);
-
-    const offset = musicBankOffset + musicTableOffsets[game];
-    const musicGroupPtrs = readPtrTable(view, offset, numGroups);
-    const unqiueMusicValues = readUniqueMusicValues(rom, musicGroupPtrs);
-    if (unqiueMusicValues.some((x) => x > maxMusicValue)) {
-        throw new Error("Read invalid music index from ROM");
+    const offset = soundPointerTableOffsets[game];
+    const ptrs = musicIndices.map((i) =>
+        readSoundPtr(view, offset + i * soundPtrSize));
+    const shuffledPtrs = shuffle(ptrs);
+    for (const i of musicIndices) {
+        writeSoundPtr(view, offset + i * soundPtrSize, shuffledPtrs[i]);
     }
-
-    const musicMap = createShuffleMap(unqiueMusicValues);
-    replaceMusicValues(view, musicGroupPtrs, musicMap);
 }
