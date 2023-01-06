@@ -23,6 +23,10 @@ section {
     margin-bottom: 1.5rem;
 }
 
+#options {
+    line-height: 2;
+}
+
 #messageArea {
     color: darkred;
     background-color: lightpink;
