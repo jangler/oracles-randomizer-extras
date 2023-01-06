@@ -49,6 +49,7 @@ function replaceMusicValues(
 
 // one potential caveat to this approach is that music values not present in
 // the music-by-room table (if there are any) don't participate in the shuffle.
+// TODO shuffle pointers instead
 function shuffleMusicInPlace(rom: ArrayBuffer) {
     const game = romType(rom);
     const view = new DataView(rom);

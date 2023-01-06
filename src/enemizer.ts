@@ -27,6 +27,14 @@ const objectBankOffsets = {
 // - whether the enemy can be switched with
 // - whether the enemy works in small or large rooms
 
+// the best way to do this without getting into room-specific logic is probably
+// to have a logic tree with leaves that can represent enemies (RiverZora,
+// Octorok), collisions between items and enemies (SwordPush, RodDamage), and
+// intermediate steps (CommonVulnerabilities). enemies could only be replaced
+// by enemies that support a superset of the original enemy's collisions.
+// land/sea/air, topdown/sidescrolling, and small/large can be represented by
+// similar trees.
+
 const supportedIDs = [
     0x08, // river zora
     0x09, // octorok
