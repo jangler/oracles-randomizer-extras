@@ -1,7 +1,6 @@
 // front-end
 
-import { shuffleMusicInPlace } from "./music";
-import { randomizeEnemies } from "./enemizer";
+import { shuffleMusic, shuffleSfx } from "./audio";
 import { fixHeaderChecksum } from "./rom";
 
 const generateButton =
@@ -10,8 +9,8 @@ const messageArea =
     document.querySelector('#messageArea') as HTMLParagraphElement;
 const musicShuffleCheckbox =
     document.querySelector('#musicShuffleCheckbox') as HTMLInputElement;
-const enemizerCheckbox =
-    document.querySelector('#enemizerCheckbox') as HTMLInputElement;
+const sfxShuffleCheckbox =
+    document.querySelector('#sfxShuffleCheckbox') as HTMLInputElement;
 
 function reportError(err: Error) {
     messageArea.setAttribute('style', 'display: block;');
@@ -44,8 +43,8 @@ generateButton.addEventListener('click', (event) => {
         file.arrayBuffer().then((buf) => {
             clearError();
             try {
-                if (musicShuffleCheckbox.checked) shuffleMusicInPlace(buf);
-                if (enemizerCheckbox.checked) randomizeEnemies(buf);
+                if (musicShuffleCheckbox.checked) shuffleMusic(buf);
+                if (sfxShuffleCheckbox.checked) shuffleSfx(buf);
                 fixHeaderChecksum(buf);
                 const blob = new Blob([buf], { type: 'application/gbc' });
                 download(blob, file.name.replace('.gbc', '_extras.gbc'));
