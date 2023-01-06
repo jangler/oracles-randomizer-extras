@@ -11,7 +11,23 @@ const soundPointerTableOffsets = {
 const soundPtrSize = 3;
 const soundPtrAddrIsLittleEndian = true;
 
-const musicIndices = [...new Array(0x4c).keys()];
+const unusedIndices = [0x00, 0x37, 0x3a, 0x3b, 0x41, 0x42, 0x43, 0x44, 0x45,
+    0x47, 0x48, 0x49, 0x4b];
+
+const jingleIndices = [0x06, 0x10, 0x40];
+
+const gameSpecificIndices = {
+    [Game.Seasons]: [0x3d],
+    [Game.Ages]: [0x24, 0x30],
+};
+
+const baseMusicIndices = [...new Array(0x4c).keys()]
+    .filter((i) => ![
+        unusedIndices,
+        jingleIndices,
+        gameSpecificIndices[Game.Seasons],
+        gameSpecificIndices[Game.Ages],
+    ].some((indices) => indices.includes(i)));
 
 function readSoundPtr(view: DataView, offset: number): [number, number] {
     const bankOffset = view.getUint8(offset);
@@ -42,10 +58,9 @@ function shuffleMusicInPlace(rom: ArrayBuffer) {
     const game = romType(rom);
     const view = new DataView(rom);
     const offset = soundPointerTableOffsets[game];
-    const ptrs = musicIndices.map((i) =>
-        readSoundPtr(view, offset + i * soundPtrSize));
-    const shuffledPtrs = shuffle(ptrs);
-    for (const i of musicIndices) {
-        writeSoundPtr(view, offset + i * soundPtrSize, shuffledPtrs[i]);
-    }
+    const musicIndices = baseMusicIndices.concat(gameSpecificIndices[game]);
+    const ptrs = musicIndices
+        .map((i) => readSoundPtr(view, offset + i * soundPtrSize));
+    shuffle(ptrs).forEach((ptr, i) =>
+        writeSoundPtr(view, offset + musicIndices[i] * soundPtrSize, ptr));
 }
